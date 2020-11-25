@@ -15,20 +15,15 @@ const imgBasePath = "./img";
   let urlArr = [];
   $('#container .right .bqba').each((i, e) => {
     const emoticonsPath = ($(e).attr('href'));
-    const emoticonsTitle = $(e).attr('title').split(" ")[0];
+    const emoticonsTitle = $(e).attr('title').replace(/^\<|\>|\/|\\|\||\:|\*|\?/g, "");
     const emoticonsUrl = `${baseUrl}${emoticonsPath}`;
     urlArr.push({ emoticonsUrl, emoticonsTitle });
-    // parsePage(emoticonsUrl, emoticonsTitle);
   });
-  let i = 0;
-  let point = setInterval(() => {
-    if (i < urlArr.length) {
-      const obj = urlArr[i++];
-      parsePage(obj.emoticonsUrl, obj.emoticonsTitle);
-    } else {
-      clearInterval(point);
-    }
-  }, 1000);
+  for(let i = 0; i < urlArr.length; i++) {
+    await sleep(500);
+    const obj = urlArr[i];
+    parsePage(obj.emoticonsUrl, obj.emoticonsTitle);
+  }
 })(httpUrl)
 
 async function parsePage(url, title) {
@@ -40,10 +35,11 @@ async function parsePage(url, title) {
     mkdirSync(imgPath, () => {
       console.log(`${title}文件夹创建成功`);
     });
-    $('.swiper-wrapper a img').each((i, e) => {
+    $('.swiper-wrapper a img').each(async (i, e) => {
       // console.log($(e).attr('data-original'))
       const imgUrl = $(e).attr('data-original');
       const imgName = path.parse(imgUrl).base;
+      await sleep(50);
       downloadImg(imgUrl, `${imgPath}/${imgName}`);
     })
   } catch (err) {
@@ -90,4 +86,12 @@ function mkdirSync(dir, cb) {
     })
   }
   next(index);
+}
+
+function sleep(time) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    }, time)
+  });
 }
